@@ -40,7 +40,7 @@
                             <td>{{$folder->updated_at}}</td>
                             <td>
                                 <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
-                                <button type="button" class="btn btn-warning" id="delete">Delete</button>
+                                <button type="button" class="btn btn-warning" id="delete" onclick="delete_row('{{$folder->id}}', this.parentNode.parentNode.rowIndex);">Delete</button>
                             </td>
                         </tr>
                         @endforeach
@@ -152,5 +152,44 @@
         });
 
     }
+
+    function delete_row(id, row){
+        var con = confirm("you sure you wanna delete");
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        if(con){
+            $.ajax({
+                method:'POST',
+                url: 'delete_folder/'+id,
+                data: {
+                    _token: csrf_token,
+                    id: id
+                },
+                dataType: 'json'
+            }).done(function(data){
+                $('table tbody').html('');
+                var i = 0;
+                $.each(data, function(index, datum){
+                    i++;
+                    $('table tbody').append(`
+                 <tr>
+                   <td>${i}</td>
+                   <td>${datum.name}</td>
+                   <td>${datum.size}</td>
+                   <td>${datum.updated_at}</td>
+                   <td>
+                        <button type="button" class="btn btn-default" id="rename">Rename</button>
+                        <button type="button" class="btn btn-warning" id="delete">Delete</button>
+                   </td>
+                </tr>
+                `);
+
+                });
+            });
+
+        }else{
+
+        }
+    }
+
 </script>
 @endsection
