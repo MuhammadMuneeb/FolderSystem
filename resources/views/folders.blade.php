@@ -28,11 +28,18 @@
                         @foreach($folders as $folder)
                         <tr>
                             <td>{{$loop->iteration}}</td>
-                            <th scope="row">{{$folder->name}}</th>
+                            <th scope="row" id="name">{{$folder->name}}</th>
+                            <th scope="row" id="edit_form" style="display:none">
+                            {{--<form>--}}
+                                <input type="text" value="{{$folder->name}}" name="edit_name">
+                                <button type="button" class="btn btn-default" id="save_new" onclick="save_edit()">Save</button>
+                                <button type="button" class="btn btn-warning" id="cancel_edit" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
+                            {{--</form>--}}
+                            </th>
                             <td>{{$folder->size}}</td>
                             <td>{{$folder->updated_at}}</td>
                             <td>
-                                <button type="button" class="btn btn-default" id="rename">Rename</button>
+                                <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
                                 <button type="button" class="btn btn-warning" id="delete">Delete</button>
                             </td>
                         </tr>
@@ -83,12 +90,14 @@
                 i++;
                 $('table tbody').append(`
                  <tr>
-                 <td>${i}</td>
+                   <td>${i}</td>
                    <td>${datum.name}</td>
                    <td>${datum.size}</td>
-                    <td>${datum.updated_at}</td>
-                    <td>                                <button type="button" class="btn btn-default" id="rename">Rename</button>
-                                <button type="button" class="btn btn-warning" id="delete">Delete</button></td>
+                   <td>${datum.updated_at}</td>
+                   <td>
+                        <button type="button" class="btn btn-default" id="rename">Rename</button>
+                        <button type="button" class="btn btn-warning" id="delete">Delete</button>
+                   </td>
                 </tr>
                 `)
 
@@ -100,5 +109,24 @@
         var row_new = document.getElementById('new_form');
         row_new.style.display = 'none';
     }
+
+    function rename(va){
+        var table = document.getElementById('table');
+        var row = table.rows[va];
+        var cell = row.cells[1];
+        var cell_form = row.cells[2];
+        cell_form.style.display = 'block';
+        cell.style.display = 'none';
+    }
+
+    function revert(va){
+        var table = document.getElementById('table');
+        var row = table.rows[va];
+        var cell = row.cells[1];
+        var cell_form = row.cells[2];
+        cell_form.style.display = 'none';
+        cell.style.display = 'block';
+    }
+
 </script>
 @endsection
