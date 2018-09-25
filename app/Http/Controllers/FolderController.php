@@ -27,12 +27,12 @@ class FolderController extends Controller
 
     public function edit_name(Request $request, $id){
     	Folder::where('id', $id)->update(['name'=>$request['name']]);
-    	return response()->json('Folder name updated', 200);
+    	$folder = Folder::where('id', $id)->first();
+    	return response()->json($folder, 200);
     }
 
     public function folder_list(){
     	$folders = Folder::where('user_id', Auth::id())->get();
-//    	return response()->json($folders, 200);
         return view('folders')->with(compact('folders'));
     }
 

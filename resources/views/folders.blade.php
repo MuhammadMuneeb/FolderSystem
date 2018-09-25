@@ -32,7 +32,7 @@
                             <th scope="row" id="edit_form" style="display:none">
                             {{--<form>--}}
                                 <input type="text" value="{{$folder->name}}" name="edit_name">
-                                <button type="button" class="btn btn-default" id="save_new" onclick="save_edit()">Save</button>
+                                <button type="button" class="btn btn-default" id="save_new" onclick="save_edit('{{$folder->id}}', this.parentNode.parentNode.rowIndex)">Save</button>
                                 <button type="button" class="btn btn-warning" id="cancel_edit" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
                             {{--</form>--}}
                             </th>
@@ -128,5 +128,29 @@
         cell.style.display = 'block';
     }
 
+    function save_edit(id, rowed){
+       var table = document.getElementById('table');
+        var row = table.rows[rowed];
+        var cell = row.cells[1];
+        var cell_form = row.cells[2];
+        var name = cell_form.children[0].value;
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            method:'POST',
+            url: 'edit_name/'+id,
+            data: {
+                _token: csrf_token,
+                name: name
+            },
+            dataType: 'json'
+        }).done(function(data){
+            cell_form.style.display = 'none';
+            cell.style.display = 'block';
+            row.cells[1].innerHTML = data.name;
+            row.cells[3].innerHTML = data.size;
+            row.cells[4].innerHTML = data.updated_at;
+        });
+
+    }
 </script>
 @endsection
