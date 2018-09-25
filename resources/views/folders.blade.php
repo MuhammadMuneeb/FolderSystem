@@ -5,10 +5,19 @@
     </div>
     <div class="col-md-8">
         <div class="container-fluid">
+           <div class="row">
+               <div class="container-fluid">
             <h3>
                 My Files
             </h3>
+            <button type="button" class="btn btn-default" id="upload" style="display: none;" onclick="add_new_file()">
+                Upload File
+            </button>
+
+        <br>
             <button type="button" class="btn btn-default" id="new_button" onclick="add_new()">New Folder</button>
+           </div>
+           </div>
         </div>
         <br>
         <div class="row">
@@ -28,7 +37,7 @@
                         @foreach($folders as $folder)
                         <tr>
                             <td>{{$loop->iteration}}</td>
-                            <th scope="row" id="name">{{$folder->name}}</th>
+                            <th scope="row" id="name"><a onclick="load_files('{{$folder->id}}')">{{$folder->name}}</a></th>
                             <th scope="row" id="edit_form" style="display:none">
                             {{--<form>--}}
                                 <input type="text" value="{{$folder->name}}" name="edit_name">
@@ -186,7 +195,6 @@
                             <td></td>
                             <td>
                                 <form id='form' onsubmit="create()">
-                                    {{csrf_field()}}
                         <input type="text" id="folder_name" name="name">
                         <button type="button" class="btn btn-default" id="create_folder" onclick="create()">Create</button>
                         <button type="button" class="btn btn-warning" id="cancel_folder" onclick="cancel()">Cancel</button>
@@ -201,6 +209,47 @@
             });
 
         }
+    }
+
+
+    function load_files(folder_id){
+        var up_button = document.getElementById('upload');
+        up_button.style.display = 'block';
+        $.ajax({
+            method:'GET',
+            url:'all_files/'+folder_id,
+            dataType:'json'
+        }).done(function(data){
+            var i = 0;
+            $('table tbody').html('');
+            $.each(data, function(index, datum){
+                $('table tbody').append(`
+                 <tr>
+                   <td>${i}</td>
+                   <td>${datum.name}</td>
+                   <td>${datum.size}</td>
+                   <td>${datum.updated_at}</td>
+                   <td>
+                        <button type="button" class="btn btn-default" id="rename">Rename</button>
+                        <button type="button" class="btn btn-warning" id="delete">Delete</button>
+                   </td>
+                </tr>
+
+                  <tr style="display:none" id="new_form">
+                            <td></td>
+                            <td>
+                                <form id='form' onsubmit="create()">
+                        <input type="text" id="folder_name" name="name">
+                        <button type="button" class="btn btn-default" id="create_folder" onclick="create()">Create</button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder" onclick="cancel()">Cancel</button>
+                    </form>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+`);
+            });
+        });
     }
 
 </script>
