@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Folder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -19,10 +21,11 @@ class HomeController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\View\View
      */
     public function index()
     {
-        return view('home');
+	    $folders = Folder::where('user_id', Auth::id())->get();
+	    return view('folders')->with(compact('folders'));
     }
 }

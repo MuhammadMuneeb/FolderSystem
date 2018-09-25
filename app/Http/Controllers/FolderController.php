@@ -10,10 +10,14 @@ class FolderController extends Controller
 {
     public function create_folder(Request $request){
     	$data = $request->all();
-    	$folder = new Folder($data);
+    	$folder = new Folder();
+    	$folder->name = $request['name'];
+	    $folder->user_id = Auth::id();
+	    $folder->size = 0;
     	$folder->save();
-
-    	return response()->json('Folder created', 200);
+    	$this->folder_list();
+		$folders = Folder::where('user_id', Auth::id())->get();
+    	return response()->json($folders, 200);
     }
 
     public function delete_folder($id){
@@ -28,7 +32,8 @@ class FolderController extends Controller
 
     public function folder_list(){
     	$folders = Folder::where('user_id', Auth::id())->get();
-    	return response()->json($folders, 200);
+//    	return response()->json($folders, 200);
+        return view('folders')->with(compact('folders'));
     }
 
 }
