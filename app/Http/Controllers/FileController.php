@@ -5,21 +5,24 @@ namespace App\Http\Controllers;
 use App\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Mockery\Exception;
+use Psy\Exception\RuntimeException;
 
 class FileController extends Controller
 {
+
     public function create(Request $request, $folder_id){
-		$file = $request->file('file');
-		$file_path = $file->move(public_path(Auth::id()), $file->getClientOriginalName());
-		$file_size = filesize($file);
-		File::create([
-			'file_name'=>$file->getClientOriginalName(),
-			'size'=>$file_size,
-			'file_path'=>$file_path,
-			'folder_id'=>$folder_id
-		]);
-	    $files = File::where('folder_id', $folder_id)->get();
-	    return response()->json($files, 200);
+		    $file = $request->file('file');
+		    $file_path = $file->move(public_path(Auth::id()), $file->getClientOriginalName());
+			$file_size = $request->file('file')->getSize();
+		    File::create([
+			    'file_name'=>$file->getClientOriginalName(),
+			    'size'=>$file_size,
+			    'file_path'=>$file_path,
+			    'folder_id'=>$folder_id
+		    ]);
+		    $files = File::where('folder_id', $folder_id)->get();
+		    return response()->json($files, 200);
     }
 
     public function download(){

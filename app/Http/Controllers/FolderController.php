@@ -21,7 +21,7 @@ class FolderController extends Controller
     }
 
     public function delete_folder($id){
-    	Folder::where('id', $id)->delete();
+    	Folder::with('File')->where('id', $id)->delete();
 	    $folders = Folder::where('user_id', Auth::id())->get();
 	    return response()->json($folders, 200);
     }

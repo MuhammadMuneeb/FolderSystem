@@ -10,10 +10,10 @@
             <h3>
                 My Files
             </h3>
-            <button type="button" class="btn btn-default" id="upload" style="display: none;" onclick="add_new_file()">
-                Upload File
-            </button>
-
+                   <form enctype="multipart/form-data" onsubmit="add_file(9)">
+            <input type="file" class="btn btn-default" id="upload" style="display: none;" name="file">
+                       <button class="btn btn-success" type="button" onclick="add_file(9)"></button>
+                   </form>
         <br>
             <button type="button" class="btn btn-default" id="new_button" onclick="add_new()">New Folder</button>
            </div>
@@ -27,7 +27,7 @@
                         <thead class="thead-dark">
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Folder</th>
+                            <th scope="col">Name</th>
                             <th scope="col">Size</th>
                             <th scope="col">Modified</th>
                             <th scope="col">Actions</th>
@@ -37,13 +37,11 @@
                         @foreach($folders as $folder)
                         <tr>
                             <td>{{$loop->iteration}}</td>
-                            <th scope="row" id="name"><a onclick="load_files('{{$folder->id}}')">{{$folder->name}}</a></th>
+                            <th scope="row" id="name"><a href="#" onclick="load_files('{{$folder->id}}')">{{$folder->name}}</a></th>
                             <th scope="row" id="edit_form" style="display:none">
-                            {{--<form>--}}
                                 <input type="text" value="{{$folder->name}}" name="edit_name">
                                 <button type="button" class="btn btn-default" id="save_new" onclick="save_edit('{{$folder->id}}', this.parentNode.parentNode.rowIndex)">Save</button>
                                 <button type="button" class="btn btn-warning" id="cancel_edit" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
-                            {{--</form>--}}
                             </th>
                             <td>{{$folder->size}}</td>
                             <td>{{$folder->updated_at}}</td>
@@ -74,6 +72,8 @@
     </div>
 </div>
 <script>
+
+    //TODO Update dynamic HTML to include all latest methods
     function add_new(){
         var row_new = document.getElementById('new_form');
         row_new.style.display = 'block';
@@ -186,8 +186,8 @@
                    <td>${datum.size}</td>
                    <td>${datum.updated_at}</td>
                    <td>
-                        <button type="button" class="btn btn-default" id="rename">Rename</button>
-                        <button type="button" class="btn btn-warning" id="delete">Delete</button>
+                        <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
+                        <button type="button" class="btn btn-warning" id="delete" onclick="delete_row(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
                    </td>
                 </tr>
 
@@ -220,18 +220,17 @@
             url:'all_files/'+folder_id,
             dataType:'json'
         }).done(function(data){
-            var i = 0;
             $('table tbody').html('');
             $.each(data, function(index, datum){
                 $('table tbody').append(`
                  <tr>
-                   <td>${i}</td>
-                   <td>${datum.name}</td>
+                   <td>${index+1}</td>
+                   <td>${datum.file_name}</td>
                    <td>${datum.size}</td>
                    <td>${datum.updated_at}</td>
                    <td>
-                        <button type="button" class="btn btn-default" id="rename">Rename</button>
-                        <button type="button" class="btn btn-warning" id="delete">Delete</button>
+                        <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
+                        <button type="button" class="btn btn-warning" id="delete" onclick="remove_file(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
                    </td>
                 </tr>
 
@@ -251,6 +250,88 @@
             });
         });
     }
+
+    function add_file(folder_id){
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+//        var file = $('input[name=file]').val();
+        var file = $('#upload')[0].files[0];
+        var form = new FormData();
+        form.append('file', file);
+        console.log(file);
+        $.ajax({
+            headers:{
+                'X-CSRF-TOKEN': csrf_token
+            },
+            method:'POST',
+            url:'add_file/'+folder_id,
+            data:file,
+            dataType:'json',
+            contentType: false,
+            cache: false,
+            processData: false
+        }).done(function(data){
+            //TODO Figure out the problem on PHP's end.
+            console.log(data);
+        });
+    }
+
+    function rename_file(file_id, row){
+
+    }
+
+    function remove_file(file_id, row){
+        var con = confirm("you sure you wanna delete");
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        if(con){
+            $.ajax({
+                method:'POST',
+                url: 'delete_file/'+file_id,
+                data: {
+                    _token: csrf_token,
+                    id: file_id
+                },
+                dataType: 'json'
+            }).done(function(data){
+                $('table tbody').html('');
+                var i = 0;
+                $.each(data, function(index, datum){
+                    i++;
+                    $('table tbody').append(`
+                 <tr>
+                   <td>${i}</td>
+                   <td>${datum.file_name}</td>
+                   <td>${datum.size}</td>
+                   <td>${datum.updated_at}</td>
+                   <td>
+                        <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
+                        <button type="button" class="btn btn-warning" id="delete" onclick="remove_file(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
+                   </td>
+                </tr>
+
+                  <tr style="display:none" id="new_form">
+                            <td></td>
+                            <td>
+                                <form id='form' onsubmit="create()">
+                        <input type="text" id="folder_name" name="name">
+                        <button type="button" class="btn btn-default" id="create_folder" onclick="create()">Create</button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder" onclick="cancel()">Cancel</button>
+                    </form>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+`);
+
+                });
+            });
+
+        }
+    }
+
+    function create_sub_folder(folder_id){
+
+    }
+
 
 </script>
 @endsection
