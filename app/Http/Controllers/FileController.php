@@ -30,7 +30,7 @@ class FileController extends Controller
     }
 
     public function rename(Request $request, $id){
-	    File::where('id', $id)->update(['name'=>$request['name']]);
+	    File::where('id', $id)->update(['file_name'=>$request['name']]);
 	    $file = File::where('id', $id)->first();
 	    return response()->json($file, 200);
     }

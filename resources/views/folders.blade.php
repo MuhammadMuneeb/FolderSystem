@@ -226,10 +226,16 @@
                  <tr>
                    <td>${index+1}</td>
                    <td>${datum.file_name}</td>
+
+                    <td scope="row" id="edit_file" style="display:none">
+                                <input type="text" value="${datum.file_name}" name="edit_name">
+                                <button type="button" class="btn btn-default" id="save_new" onclick="rename_file('${datum.id}', this.parentNode.parentNode.rowIndex)">Save</button>
+                                <button type="button" class="btn btn-warning" id="cancel_edit_file" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
+                            </td>
                    <td>${datum.size}</td>
                    <td>${datum.updated_at}</td>
                    <td>
-                        <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
+                        <button type="button" class="btn btn-default" id="rename" onclick="rename_file_form(this.parentNode.parentNode.rowIndex);">Rename</button>
                         <button type="button" class="btn btn-warning" id="delete" onclick="remove_file(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
                    </td>
                 </tr>
@@ -249,6 +255,15 @@
 `);
             });
         });
+    }
+
+    function rename_file_form(row){
+        var table = document.getElementById('table');
+        var row = table.rows[row];
+        var cell = row.cells[1];
+        var cell_form = row.cells[2];
+        cell_form.style.display = 'block';
+        cell.style.display = 'none';
     }
 
     function add_file(folder_id){
@@ -275,7 +290,28 @@
         });
     }
 
-    function rename_file(file_id, row){
+    function rename_file(file_id, rowed){
+        var table = document.getElementById('table');
+        var row = table.rows[rowed];
+        var cell = row.cells[1];
+        var cell_form = row.cells[2];
+        var name = cell_form.children[0].value;
+        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            method:'POST',
+            url: 'rename_file/'+file_id,
+            data: {
+                _token: csrf_token,
+                name: name
+            },
+            dataType: 'json'
+        }).done(function(data){
+            cell_form.style.display = 'none';
+            cell.style.display = 'block';
+            row.cells[1].innerHTML = data.file_name;
+            row.cells[3].innerHTML = data.size;
+            row.cells[4].innerHTML = data.updated_at;
+        });
 
     }
 
