@@ -181,12 +181,24 @@
                         <button type="button" class="btn btn-warning" id="delete">Delete</button>
                    </td>
                 </tr>
-                `);
+
+                  <tr style="display:none" id="new_form">
+                            <td></td>
+                            <td>
+                                <form id='form' onsubmit="create()">
+                                    {{csrf_field()}}
+                        <input type="text" id="folder_name" name="name">
+                        <button type="button" class="btn btn-default" id="create_folder" onclick="create()">Create</button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder" onclick="cancel()">Cancel</button>
+                    </form>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+`);
 
                 });
             });
-
-        }else{
 
         }
     }

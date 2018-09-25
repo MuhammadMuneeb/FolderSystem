@@ -18,4 +18,7 @@ class Folder extends Model
     	return $this->belongsTo('App\User', 'user_id');
     }
 
+    public function File(){
+    	return $this->hasMany('App\File');
+    }
 }
