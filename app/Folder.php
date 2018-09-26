@@ -10,7 +10,8 @@ class Folder extends Model
     protected $fillable = [
     	'name',
 	    'user_id',
-	    'size'
+	    'size',
+	    'unit'
     ];
     protected $size = 'size';
 

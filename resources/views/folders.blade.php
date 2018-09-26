@@ -7,13 +7,12 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="container-fluid">
-                        <h3>
+                        <h3 id="crumbs">
                             My Files
                         </h3>
-                        <form enctype="multipart/form-data" onsubmit="add_file(9)" style="display: none;" id="upload">
-                            <input type="file" class="btn btn-default"  name="file">
-                            <button class="btn btn-success" type="button" onclick="add_file(9)">Submit</button>
-                        </form>
+                        <span id="abc">
+
+                            </span>
                         <br>
                         <button type="button" class="btn btn-default" id="new_button" onclick="add_new()">New Folder
                         </button>
@@ -44,14 +43,14 @@
                                     <th scope="row" id="edit_form" style="display:none">
                                         <input type="text" value="{{$folder->name}}" name="edit_name">
                                         <button type="button" class="btn btn-default" id="save_new"
-                                                onclick="save_edit('{{$folder->id}}', this.parentNode.parentNode.rowIndex)">
+                                                onclick="save_edit('{{$folder->id}}', this.parentNode.parentNode.rowIndex, event)">
                                             Save
                                         </button>
                                         <button type="button" class="btn btn-warning" id="cancel_edit"
                                                 onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel
                                         </button>
                                     </th>
-                                    <td>{{$folder->size}}</td>
+                                    <td>{{$folder->size}} {{$folder->unit}}</td>
                                     <td>{{$folder->updated_at}}</td>
                                     <td>
                                         <button type="button" class="btn btn-default" id="rename"
@@ -67,11 +66,11 @@
                             <tr style="display:none" id="new_form">
                                 <td></td>
                                 <td>
-                                    <form id='form' onsubmit="create()">
-                                        {{csrf_field()}}
+                                    <form id='form' onsubmit="create(event)">
+
                                         <input type="text" id="folder_name" name="name">
                                         <button type="button" class="btn btn-default" id="create_folder"
-                                                onclick="create()">Create
+                                                onclick="create(event)">Create
                                         </button>
                                         <button type="button" class="btn btn-warning" id="cancel_folder"
                                                 onclick="cancel()">Cancel
@@ -98,7 +97,8 @@
             row_new.style.display = 'block';
         }
 
-        function create() {
+        function create(event) {
+            event.preventDefault();
             var name = $('input[name=name]').val();
             var csrf_token = $('meta[name="csrf-token"]').attr('content');
 
@@ -119,15 +119,47 @@
                     $('table tbody').append(`
                  <tr>
                    <td>${i}</td>
-                   <td>${datum.name}</td>
-                   <td>${datum.size}</td>
+                   <td><a href="#" onclick="load_files(${datum.id}>${datum.name}</a></td>
+                   <th scope="row" id="edit_form" style="display:none">
+                                        <input type="text" value="${datum.name}" name="edit_name">
+                                        <button type="button" class="btn btn-default" id="save_new"
+                                                onclick="save_edit(${datum.id}, this.parentNode.parentNode.rowIndex, event)">
+                                            Save
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="cancel_edit"
+                                                onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel
+                                        </button>
+                                    </th>
+                   <td>${datum.size} ${datum.unit}</td>
                    <td>${datum.updated_at}</td>
                    <td>
-                        <button type="button" class="btn btn-default" id="rename">Rename</button>
-                        <button type="button" class="btn btn-warning" id="delete">Delete</button>
+                         <button type="button" class="btn btn-default" id="rename"
+                                                onclick="rename(this.parentNode.parentNode.rowIndex);">Rename
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="delete"
+                                                onclick="delete_row(${datum.id} , this.parentNode.parentNode.rowIndex);">
+                                            Delete
+                                        </button>
                    </td>
                 </tr>
-                `)
+
+
+                    <tr style="display:none" id="new_form">
+                                <td></td>
+                                <td>
+                                    <form id='form' onsubmit="create(event)">
+                        <input type="text" id="folder_name" name="name">
+                        <button type="button" class="btn btn-default" id="create_folder"
+                                onclick="create()">Create
+                        </button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder"
+                                onclick="cancel()">Cancel
+                        </button>
+                    </form>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>`)
 
                 });
             });
@@ -156,7 +188,8 @@
             cell.style.display = 'block';
         }
 
-        function save_edit(id, rowed) {
+        function save_edit(id, rowed, event) {
+            event.preventDefault();
             var table = document.getElementById('table');
             var row = table.rows[rowed];
             var cell = row.cells[1];
@@ -174,8 +207,8 @@
             }).done(function (data) {
                 cell_form.style.display = 'none';
                 cell.style.display = 'block';
-                row.cells[1].innerHTML = data.name;
-                row.cells[3].innerHTML = data.size;
+                row.cells[1].innerHTML = `<a href="#" onclick="load_files(${data.id})">${data.name}</a>`;
+                row.cells[3].innerHTML = data.size+data.unit;
                 row.cells[4].innerHTML = data.updated_at;
             });
 
@@ -234,21 +267,31 @@
         //FILE FUNCTIONS. PUT THEM IN SEPARATE FILE
 
         function load_files(folder_id) {
-            var up_button = document.getElementById('upload');
-            up_button.style.display = 'block';
             $.ajax({
                 method: 'GET',
                 url: 'all_files/' + folder_id,
                 dataType: 'json'
             }).done(function (data) {
+                console.log(data);
+                var file=data[0].file;
+                console.log("File", file);
                 $('table tbody').html('');
-                $.each(data, function (index, datum) {
+                var crumb = document.getElementById('crumbs');
+                var sub_form = document.getElementById('abc');
+                var div = document.createElement('div');
+                var idea = data[0].id;
+                sub_form.innerHTML =
+                    '<form enctype="multipart/form-data" onsubmit="add_file('+idea+')"> <input type="file" id="upload" class="btn btn-default" name="file"> <button class="btn btn-success" onclick="add_file('+idea+')" type="button">Submit</button> </form>';
+                console.log(niggah);
+                crumb.append(
+                    `>> ${data[0].name}`
+                );
+                $.each(file, function (index, datum) {
                     $('table tbody').append(`
                  <tr>
                    <td>${index + 1}</td>
                    <td>${datum.file_name}</td>
-
-                    <td scope="row" id="edit_file" style="display:none">
+                   <td scope="row" id="edit_file" style="display:none">
                                 <input type="text" value="${datum.file_name}" name="edit_name">
                                 <button type="button" class="btn btn-default" id="save_new" onclick="rename_file('${datum.id}', this.parentNode.parentNode.rowIndex)">Save</button>
                                 <button type="button" class="btn btn-warning" id="cancel_edit_file" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
@@ -289,12 +332,11 @@
 
         function add_file(folder_id) {
             var csrf_token = $('meta[name="csrf-token"]').attr('content');
+            var nnn = document.getElementById('upload');
             var file = $('#upload')[0].files[0];
             var form = new FormData();
             form.append('file', file);
             form.append('size', file.size);
-            console.log(file.size);
-            console.log('this is sparta:', form);
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': csrf_token
@@ -307,7 +349,6 @@
                 cache: false,
                 processData: false
             }).done(function (data) {
-                //TODO Figure out the problem on PHP's end and update the file table
                 console.log(data);
             });
         }

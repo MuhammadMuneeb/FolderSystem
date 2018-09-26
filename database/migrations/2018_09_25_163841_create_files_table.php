@@ -18,6 +18,7 @@ class CreateFilesTable extends Migration
             $table->string('file_name')->charset('utf8');
             $table->string('file_path')->charset('utf8');
             $table->float('size');
+            $table->string('unit');
             $table->unsignedInteger('folder_id');
             $table->foreign('folder_id')->references('id')->on('folders');
             $table->timestamps();

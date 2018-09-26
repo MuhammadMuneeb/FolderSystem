@@ -14,6 +14,7 @@ class FolderController extends Controller
     	$folder->name = $request['name'];
 	    $folder->user_id = Auth::id();
 	    $folder->size = 0;
+	    $folder->unit = 'bytes';
     	$folder->save();
     	$this->folder_list();
 		$folders = Folder::where('user_id', Auth::id())->get();
