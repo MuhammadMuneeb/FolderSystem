@@ -13,6 +13,7 @@ class Folder extends Model
 	    'size',
 	    'unit'
     ];
+    protected $parent_folder = 'parent_folder';
     protected $size = 'size';
 
     public function User(){
@@ -22,4 +23,13 @@ class Folder extends Model
     public function File(){
     	return $this->hasMany('App\File');
     }
+
+    public function Parent(){
+		return $this->hasMany('App\Folder', 'parent_folder');
+    }
+
+    public function Child(){
+		return $this->belongsTo('App\Folder', 'parent_folder');
+    }
+
 }

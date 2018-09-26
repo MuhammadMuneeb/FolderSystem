@@ -18,8 +18,10 @@ class CreateFoldersTable extends Migration
             $table->string('name')->charset('utf8');
             $table->float('size')->default(0);
             $table->string('unit');
+            $table->unsignedInteger('parent_folder')->nullable();
             $table->unsignedInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('parent_folder')->references('id')->on('folders')->onDelete('cascade');
 	        $table->timestamps();
         });
     }

@@ -24,7 +24,7 @@ class FileRequest extends FormRequest
     public function rules()
     {
         return [
-	        'file' => 'required|mimes:JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, txt, xls, xlxs'
+	        'file' => 'required|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt,xls,xlsx'
         ];
     }
 }
