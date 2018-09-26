@@ -150,7 +150,7 @@
                                     <form id='form' onsubmit="create(event)">
                         <input type="text" id="folder_name" name="name">
                         <button type="button" class="btn btn-default" id="create_folder"
-                                onclick="create()">Create
+                                onclick="create(event)">Create
                         </button>
                         <button type="button" class="btn btn-warning" id="cancel_folder"
                                 onclick="cancel()">Cancel
@@ -265,7 +265,7 @@
                                     <form id='form' onsubmit="create(event)">
                         <input type="text" id="folder_name" name="name">
                         <button type="button" class="btn btn-default" id="create_folder"
-                                onclick="create()">Create
+                                onclick="create(event)">Create
                         </button>
                         <button type="button" class="btn btn-warning" id="cancel_folder"
                                 onclick="cancel()">Cancel
@@ -301,22 +301,22 @@
                 var div = document.createElement('div');
                 var idea = data[0].id;
                 sub_form.innerHTML =
-                    '<form enctype="multipart/form-data" onsubmit="add_file('+idea+')"> <input type="file" id="upload" class="btn btn-default" name="file"> <button class="btn btn-success" onclick="add_file('+idea+')" type="button">Submit</button> </form>';
-                console.log(niggah);
+                    `<form enctype="multipart/form-data" onsubmit="add_file('+idea+')"> <input type="file" id="upload" class="btn btn-default" name="file"> <button class="btn btn-success" onclick="add_file(${idea}, event)" type="button">Submit</button> </form>`;
                 crumb.append(
                     `>> ${data[0].name}`
                 );
                 $.each(file, function (index, datum) {
                     $('table tbody').append(`
+
                  <tr>
                    <td>${index + 1}</td>
                    <td>${datum.file_name}</td>
                    <td scope="row" id="edit_file" style="display:none">
                                 <input type="text" value="${datum.file_name}" name="edit_name">
-                                <button type="button" class="btn btn-default" id="save_new" onclick="rename_file('${datum.id}', this.parentNode.parentNode.rowIndex)">Save</button>
+                                <button type="button" class="btn btn-default" id="save_new" onclick="rename_file('${datum.id}', this.parentNode.parentNode.rowIndex, event)">Save</button>
                                 <button type="button" class="btn btn-warning" id="cancel_edit_file" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
                             </td>
-                   <td>${datum.size}</td>
+                   <td>${datum.size} ${datum.unit}</td>
                    <td>${datum.updated_at}</td>
                    <td>
                         <button type="button" class="btn btn-default" id="rename" onclick="rename_file_form(this.parentNode.parentNode.rowIndex);">Rename</button>
@@ -325,12 +325,16 @@
                 </tr>
 
                   <tr style="display:none" id="new_form">
-                            <td></td>
-                            <td>
-                                <form id='form' onsubmit="create()">
+                                <td></td>
+                                <td>
+                                    <form id='form' onsubmit="create(event)">
                         <input type="text" id="folder_name" name="name">
-                        <button type="button" class="btn btn-default" id="create_folder" onclick="create()">Create</button>
-                        <button type="button" class="btn btn-warning" id="cancel_folder" onclick="cancel()">Cancel</button>
+                        <button type="button" class="btn btn-default" id="create_folder"
+                                onclick="create(event)">Create
+                        </button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder"
+                                onclick="cancel()">Cancel
+                        </button>
                     </form>
                 </td>
                 <td></td>
@@ -350,7 +354,8 @@
             cell.style.display = 'none';
         }
 
-        function add_file(folder_id) {
+        function add_file(folder_id, event) {
+            event.preventDefault();
             var csrf_token = $('meta[name="csrf-token"]').attr('content');
             var nnn = document.getElementById('upload');
             var file = $('#upload')[0].files[0];
@@ -369,11 +374,49 @@
                 cache: false,
                 processData: false
             }).done(function (data) {
-                console.log(data);
+                $('table tbody').html('');
+                $.each(data, function (index, datum) {
+                    $('table tbody').append(`
+
+                 <tr>
+                   <td>${index + 1}</td>
+                   <td>${datum.file_name}</td>
+                   <td scope="row" id="edit_file" style="display:none">
+                                <input type="text" value="${datum.file_name}" name="edit_name">
+                                <button type="button" class="btn btn-default" id="save_new" onclick="rename_file('${datum.id}', this.parentNode.parentNode.rowIndex, event)">Save</button>
+                                <button type="button" class="btn btn-warning" id="cancel_edit_file" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
+                            </td>
+                   <td>${datum.size} ${datum.unit}</td>
+                   <td>${datum.updated_at}</td>
+                   <td>
+                        <button type="button" class="btn btn-default" id="rename" onclick="rename_file_form(this.parentNode.parentNode.rowIndex);">Rename</button>
+                        <button type="button" class="btn btn-warning" id="delete" onclick="remove_file(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
+                   </td>
+                </tr>
+
+                  <tr style="display:none" id="new_form">
+                                <td></td>
+                                <td>
+                                    <form id='form' onsubmit="create(event)">
+                        <input type="text" id="folder_name" name="name">
+                        <button type="button" class="btn btn-default" id="create_folder"
+                                onclick="create(event)">Create
+                        </button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder"
+                                onclick="cancel()">Cancel
+                        </button>
+                    </form>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+`);
+                });
             });
         }
 
-        function rename_file(file_id, rowed) {
+        function rename_file(file_id, rowed, event) {
+            event.preventDefault();
             var table = document.getElementById('table');
             var row = table.rows[rowed];
             var cell = row.cells[1];
@@ -414,24 +457,34 @@
                     $('table tbody').html('');
                     $.each(data, function (index, datum) {
                         $('table tbody').append(`
+
                  <tr>
-                   <td>${index+1}</td>
+                   <td>${index + 1}</td>
                    <td>${datum.file_name}</td>
-                   <td>${datum.size}</td>
+                   <td scope="row" id="edit_file" style="display:none">
+                                <input type="text" value="${datum.file_name}" name="edit_name">
+                                <button type="button" class="btn btn-default" id="save_new" onclick="rename_file('${datum.id}', this.parentNode.parentNode.rowIndex, event)">Save</button>
+                                <button type="button" class="btn btn-warning" id="cancel_edit_file" onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel</button>
+                            </td>
+                   <td>${datum.size} ${datum.unit}</td>
                    <td>${datum.updated_at}</td>
                    <td>
-                        <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
+                        <button type="button" class="btn btn-default" id="rename" onclick="rename_file_form(this.parentNode.parentNode.rowIndex);">Rename</button>
                         <button type="button" class="btn btn-warning" id="delete" onclick="remove_file(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
                    </td>
                 </tr>
 
                   <tr style="display:none" id="new_form">
-                            <td></td>
-                            <td>
-                                <form id='form' onsubmit="create()">
+                                <td></td>
+                                <td>
+                                    <form id='form' onsubmit="create(event)">
                         <input type="text" id="folder_name" name="name">
-                        <button type="button" class="btn btn-default" id="create_folder" onclick="create()">Create</button>
-                        <button type="button" class="btn btn-warning" id="cancel_folder" onclick="cancel()">Cancel</button>
+                        <button type="button" class="btn btn-default" id="create_folder"
+                                onclick="create(event)">Create
+                        </button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder"
+                                onclick="cancel()">Cancel
+                        </button>
                     </form>
                 </td>
                 <td></td>
