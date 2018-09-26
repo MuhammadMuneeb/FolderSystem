@@ -119,7 +119,7 @@
                     $('table tbody').append(`
                  <tr>
                    <td>${i}</td>
-                   <td><a href="#" onclick="load_files(${datum.id}>${datum.name}</a></td>
+                   <td><a href="#" onclick="load_files(${datum.id})"> ${datum.name} </a> </td>
                    <th scope="row" id="edit_form" style="display:none">
                                         <input type="text" value="${datum.name}" name="edit_name">
                                         <button type="button" class="btn btn-default" id="save_new"
@@ -234,22 +234,42 @@
                         $('table tbody').append(`
                  <tr>
                    <td>${i}</td>
-                   <td>${datum.name}</td>
-                   <td>${datum.size}</td>
+                   <td><a href="#" onclick="load_files(${datum.id})"> ${datum.name}</a></td>
+                   <th scope="row" id="edit_form" style="display:none">
+                                        <input type="text" value="${datum.name}" name="edit_name">
+                                        <button type="button" class="btn btn-default" id="save_new"
+                                                onclick="save_edit(${datum.id}, this.parentNode.parentNode.rowIndex, event)">
+                                            Save
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="cancel_edit"
+                                                onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel
+                                        </button>
+                                    </th>
+                   <td>${datum.size} ${datum.unit}</td>
                    <td>${datum.updated_at}</td>
                    <td>
-                        <button type="button" class="btn btn-default" id="rename" onclick="rename(this.parentNode.parentNode.rowIndex);">Rename</button>
-                        <button type="button" class="btn btn-warning" id="delete" onclick="delete_row(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
+                         <button type="button" class="btn btn-default" id="rename"
+                                                onclick="rename(this.parentNode.parentNode.rowIndex);">Rename
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="delete"
+                                                onclick="delete_row(${datum.id} , this.parentNode.parentNode.rowIndex);">
+                                            Delete
+                                        </button>
                    </td>
                 </tr>
 
-                  <tr style="display:none" id="new_form">
-                            <td></td>
-                            <td>
-                                <form id='form' onsubmit="create()">
+
+                    <tr style="display:none" id="new_form">
+                                <td></td>
+                                <td>
+                                    <form id='form' onsubmit="create(event)">
                         <input type="text" id="folder_name" name="name">
-                        <button type="button" class="btn btn-default" id="create_folder" onclick="create()">Create</button>
-                        <button type="button" class="btn btn-warning" id="cancel_folder" onclick="cancel()">Cancel</button>
+                        <button type="button" class="btn btn-default" id="create_folder"
+                                onclick="create()">Create
+                        </button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder"
+                                onclick="cancel()">Cancel
+                        </button>
                     </form>
                 </td>
                 <td></td>
