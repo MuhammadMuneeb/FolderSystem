@@ -291,9 +291,9 @@
                 url: 'all_files/' + folder_id,
                 dataType: 'json'
             }).done(function (data) {
-                console.log(data);
-                var file=data[0].file;
-                console.log("File", file);
+                var new_btn = document.getElementById('new_button');
+//                new_btn.setAttribute('onclick', 'create_sub_folder('+folder_id+')');
+//                var file=data[0].file;
                 $('table tbody').html('');
                 var crumb = document.getElementById('crumbs');
                 var sub_form = document.getElementById('abc');
@@ -322,14 +322,16 @@
                         <button type="button" class="btn btn-warning" id="delete" onclick="remove_file(${datum.id}, this.parentNode.parentNode.rowIndex);">Delete</button>
                    </td>
                 </tr>
-
-                  <tr style="display:none" id="new_form">
+`);
+                })
+                $('table tbody').append(`
+                <tr style="display:none" id="new_form">
                                 <td></td>
                                 <td>
-                                    <form id='form' onsubmit="create(event)">
+                                    <form id='form' onsubmit="create_sub_folder(${folder_id},event)">
                         <input type="text" id="folder_name" name="name">
                         <button type="button" class="btn btn-default" id="create_folder"
-                                onclick="create(event)">Create
+                                onclick="create_sub_folder(${folder_id},event)">Create
                         </button>
                         <button type="button" class="btn btn-warning" id="cancel_folder"
                                 onclick="cancel()">Cancel
@@ -339,8 +341,7 @@
                 <td></td>
                 <td></td>
             </tr>
-`);
-                });
+                `);
             });
         }
 
@@ -396,7 +397,7 @@
                   <tr style="display:none" id="new_form">
                                 <td></td>
                                 <td>
-                                    <form id='form' onsubmit="create(event)">
+                                    <form id='form' onsubmit="create_sub_folder(${datum.folder_id},event)">
                         <input type="text" id="folder_name" name="name">
                         <button type="button" class="btn btn-default" id="create_folder"
                                 onclick="create(event)">Create
@@ -476,7 +477,7 @@
                   <tr style="display:none" id="new_form">
                                 <td></td>
                                 <td>
-                                    <form id='form' onsubmit="create(event)">
+                                    <form id='form' onsubmit="create_sub_folder(${datum.folder_id},event)">
                         <input type="text" id="folder_name" name="name">
                         <button type="button" class="btn btn-default" id="create_folder"
                                 onclick="create(event)">Create
@@ -498,7 +499,70 @@
         }
 
         function create_sub_folder(folder_id) {
+            var name = $('input[name=name]').val();
+            var csrf_token = $('meta[name="csrf-token"]').attr('content');
 
+            $.ajax({
+                method: 'POST',
+                url: 'sub_folder/'+folder_id,
+                data: {
+                    _token: csrf_token,
+                    name: name
+                },
+                dataType: 'json'
+            }).done(function (data) {
+                console.log(data);
+                $('table tbody').html('');
+                var i = 0;
+                $.each(data, function (index, datum) {
+                    i++;
+                    $('table tbody').append(`
+                 <tr>
+                   <td>${i}</td>
+                   <td><a href="#" onclick="load_files(${datum.id})"> ${datum.name} </a> </td>
+                   <th scope="row" id="edit_form" style="display:none">
+                                        <input type="text" value="${datum.name}" name="edit_name">
+                                        <button type="button" class="btn btn-default" id="save_new"
+                                                onclick="save_edit(${datum.id}, this.parentNode.parentNode.rowIndex, event)">
+                                            Save
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="cancel_edit"
+                                                onclick="revert(this.parentNode.parentNode.rowIndex);">Cancel
+                                        </button>
+                                    </th>
+                   <td>${datum.size} ${datum.unit}</td>
+                   <td>${datum.updated_at}</td>
+                   <td>
+                         <button type="button" class="btn btn-default" id="rename"
+                                                onclick="rename(this.parentNode.parentNode.rowIndex);">Rename
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="delete"
+                                                onclick="delete_row(${datum.id} , this.parentNode.parentNode.rowIndex);">
+                                            Delete
+                                        </button>
+                   </td>
+                </tr>
+
+
+                    <tr style="display:none" id="new_form">
+                                <td></td>
+                                <td>
+                                    <form id='form' onsubmit="create(event)">
+                        <input type="text" id="folder_name" name="name">
+                        <button type="button" class="btn btn-default" id="create_folder"
+                                onclick="create(event)">Create
+                        </button>
+                        <button type="button" class="btn btn-warning" id="cancel_folder"
+                                onclick="cancel()">Cancel
+                        </button>
+                    </form>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>`)
+
+                });
+            });
         }
 
 

@@ -25,7 +25,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-	    $folders = Folder::where('user_id', Auth::id())->get();
+	    $folders = Folder::where('user_id', Auth::id())->where('parent_folder', null)->get();
 	    return view('folders')->with(compact('folders'));
     }
 }

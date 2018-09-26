@@ -62,7 +62,7 @@ class FileController extends Controller {
 	}
 
 	public function display( $folder_id ) {
-		$files = Folder::with( 'File' )->where( 'id', $folder_id )->get();
+		$files = Folder::with( 'File', 'Parent' )->where('parent_folder', $folder_id)->where( 'id', $folder_id )->get();
 
 		return response()->json( $files, 200 );
 	}
