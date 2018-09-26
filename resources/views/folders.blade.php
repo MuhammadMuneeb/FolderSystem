@@ -89,7 +89,6 @@
     </div>
     <script>
 
-        //TODO Update dynamic HTML to include all latest methods
 
         //PUT FOLDER CODE IN SEPERATE FILE
         function add_new() {
