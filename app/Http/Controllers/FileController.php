@@ -12,9 +12,10 @@ class FileController extends Controller
 {
 
     public function create(Request $request, $folder_id){
+
 		    $file = $request->file('file');
 		    $file_path = $file->move(public_path(Auth::id()), $file->getClientOriginalName());
-			$file_size = $request->file('file')->getSize();
+			$file_size = $request['size'];
 		    File::create([
 			    'file_name'=>$file->getClientOriginalName(),
 			    'size'=>$file_size,
